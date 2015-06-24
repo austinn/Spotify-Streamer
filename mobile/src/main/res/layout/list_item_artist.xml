@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:layout_margin="1dp"
+    android:elevation="4dp">
 
     <ImageView
-        android:src="@mipmap/ic_launcher"
         android:scaleType="centerCrop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/iv_artist_image"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
     <LinearLayout
         android:id="@+id/ll_artist_background"
@@ -27,14 +31,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-            android:text="Artist Name"
+            android:singleLine="true"
             android:id="@+id/tv_artist_name" />
 
         <TextView
             android:textColor="@color/background_material_light"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="New Text"
             android:id="@+id/tv_artist_genre" />
     </LinearLayout>
 </RelativeLayout>

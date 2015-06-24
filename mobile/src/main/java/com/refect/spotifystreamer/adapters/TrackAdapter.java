@@ -6,11 +6,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.refect.spotifystreamer.R;
 import com.refect.spotifystreamer.listeners.OnRecyclerViewItemClickListener;
+import com.refect.spotifystreamer.models.TrackModel;
 import com.refect.spotifystreamer.utils.Utils;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,26 +27,28 @@ import kaaes.spotify.webapi.android.models.Track;
  */
 public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ViewHolder> implements View.OnClickListener {
 
-	private List<Track> models;
-	private OnRecyclerViewItemClickListener<Track> itemClickListener;
+	private List<TrackModel> models;
+	private OnRecyclerViewItemClickListener<TrackModel> itemClickListener;
 	private static Context mContext;
 	private int lastAnimatedPosition = -1;
-	private static final int ANIMATED_ITEMS_COUNT = 7;
-	private boolean animateItems = false;
 
 	public TrackAdapter(Context context) {
 		this.models = new ArrayList<>();
 		this.mContext = context;
 	}
 
-	public TrackAdapter(List<Track> models, Context context) {
+	public TrackAdapter(List<TrackModel> models, Context context) {
 		this.models = models;
 		this.mContext = context;
 	}
 
-	public void setModels(List<Track> models) {
+	public void setModels(List<TrackModel> models) {
 		this.models = models;
 		notifyDataSetChanged();
+	}
+
+	public List<TrackModel> getModels() {
+		return this.models;
 	}
 
 	public void clear() {
@@ -75,11 +80,14 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ViewHolder> 
 	@Override
 	public void onBindViewHolder(final ViewHolder viewHolder, int i) {
 		runEnterAnimation(viewHolder.itemView, i);
-		final Track model = models.get(i);
+		final TrackModel model = models.get(i);
 		viewHolder.itemView.setTag(model);
 
-		viewHolder.title.setText(model.name);
-		viewHolder.artist.setText(model.artists.get(0).name);
+		viewHolder.title.setText(model.getTitle());
+		viewHolder.artist.setText(model.getArtist());
+
+		Picasso.with(mContext).load(model.getUrl())
+				.into(viewHolder.image);
 	}
 
 	@Override
@@ -90,34 +98,36 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ViewHolder> 
 	public static class ViewHolder extends RecyclerView.ViewHolder {
 		public TextView title;
 		public TextView artist;
+		public ImageView image;
 
 		public ViewHolder(View itemView) {
 			super(itemView);
 			title = (TextView) itemView.findViewById(R.id.tv_track_name);
 			artist = (TextView) itemView.findViewById(R.id.tv_track_artist);
+			image = (ImageView) itemView.findViewById(R.id.iv_album_image);
 		}
 
 	}
 
-	public void add(Track item, int position) {
+	public void add(TrackModel item, int position) {
 		models.add(position, item);
 		notifyItemInserted(position);
 	}
 
-	public void remove(Track item) {
+	public void remove(TrackModel item) {
 		int position = models.indexOf(item);
 		models.remove(position);
 		notifyItemRemoved(position);
 	}
 
-	public void setOnItemClickListener(OnRecyclerViewItemClickListener<Track> listener) {
+	public void setOnItemClickListener(OnRecyclerViewItemClickListener<TrackModel> listener) {
 		this.itemClickListener = listener;
 	}
 
 	@Override
 	public void onClick(View v) {
 		if (itemClickListener != null) {
-			Track model = (Track) v.getTag();
+			TrackModel model = (TrackModel) v.getTag();
 			itemClickListener.onItemClick(v, model);
 		}
 	}

@@ -1,53 +1,114 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" tools:context=".MainActivity"
-    android:background="#000">
-
-    <include layout="@layout/toolbar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/toolbar"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <RelativeLayout
-        android:id="@+id/layout_search"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="20dp"
-        android:layout_below="@+id/toolbar"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
+        android:layout_height="match_parent">
 
-        <AutoCompleteTextView
+        <include layout="@layout/toolbar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/edit_search_query"
-            android:layout_alignParentTop="true"
+            android:id="@+id/toolbar"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@color/style_color_accent"
+            android:id="@+id/view"
+            android:layout_below="@+id/toolbar"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <FrameLayout
+            android:visibility="visible"
+            android:id="@+id/content_frame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:textColor="@color/style_color_accent"
-            android:imeActionLabel="Search"
-            android:imeOptions="actionSearch"/>
+            android:layout_alignParentBottom="true"
+            android:layout_below="@+id/view" />
     </RelativeLayout>
 
-    <!--<include layout="@layout/layout_search"-->
-        <!--android:visibility="visible"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:id="@+id/layout_search"-->
-        <!--android:layout_below="@+id/toolbar"-->
-        <!--android:layout_centerHorizontal="true" />-->
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_artist"
-        android:scrollbars="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/layout_search" />
+    <RelativeLayout
+        android:background="@color/background_material_light"
+        android:id="@+id/left_drawer"
+        android:layout_gravity="start"
+        android:layout_width="240dp"
+        android:layout_height="match_parent">
 
-</RelativeLayout>
+        <android.support.v7.widget.RecyclerView android:id="@+id/left_drawer_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:choiceMode="singleChoice"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="0dp"
+            android:layout_below="@+id/relativeLayout" />
+
+        <RelativeLayout
+            android:background="@color/style_color_primary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignRight="@+id/left_drawer_list"
+            android:layout_alignEnd="@+id/left_drawer_list"
+            android:id="@+id/relativeLayout">
+
+            <ImageView
+                android:layout_width="75dp"
+                android:layout_height="75dp"
+                android:layout_marginTop="10dp"
+                android:id="@+id/iv_navigation_profile_picture"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Austin Nelson"
+                android:gravity="center"
+                android:textColor="@color/primary_material_light"
+                android:id="@+id/textView4"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_below="@+id/iv_navigation_profile_picture"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:text="nelson.b.austin@gmail.com"
+                android:gravity="center"
+                android:textColor="@color/primary_material_light"
+                android:id="@+id/textView5"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_below="@+id/textView4"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+
+            <View
+                android:background="@color/style_color_accent"
+                android:layout_width="wrap_content"
+                android:layout_height="2dp"
+                android:layout_below="@+id/textView5"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+</android.support.v4.widget.DrawerLayout>

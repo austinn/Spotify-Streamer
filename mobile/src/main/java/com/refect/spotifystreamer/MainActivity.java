@@ -1,168 +1,206 @@
 package com.refect.spotifystreamer;
 
-import android.content.Intent;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.internal.widget.AdapterViewCompat;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.Gravity;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.view.inputmethod.EditorInfo;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.refect.spotifystreamer.adapters.ArtistAdapter;
-import com.refect.spotifystreamer.async.ArtistDownloader;
-import com.refect.spotifystreamer.listeners.OnRecyclerViewItemClickListener;
+import com.refect.spotifystreamer.adapters.NavigationDrawerAdapter;
+import com.refect.spotifystreamer.fragments.ArtistFragment;
+import com.refect.spotifystreamer.models.NavigationModel;
+import com.refect.spotifystreamer.utils.CircleTransformation;
 import com.refect.spotifystreamer.utils.Utils;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
-import kaaes.spotify.webapi.android.SpotifyApi;
-import kaaes.spotify.webapi.android.models.Artist;
-
+/**
+ * This class creates the navigation drawer and starts
+ * all content animations. After the animations are
+ * finished, the ArtistFragment is instantiated.
+ */
 public class MainActivity extends AppCompatActivity {
+
+    private static final int ANIM_DURATION_TOOLBAR = 300;
+    private static final int ANIM_DURATION_FAB = 400;
+
+    private NavigationDrawerAdapter navigationAdapter;
+    private List<NavigationModel> navigationOptions;
+    private RecyclerView mDrawerList;
+    private DrawerLayout mDrawerLayout;
+    private ActionBarDrawerToggle mDrawerToggle;
 
     private Toolbar toolbar;
     private TextView tvToolbar;
-    private RecyclerView rvArtists;
-    private ArtistAdapter artistAdapter;
-    private ImageView ivSearch;
-    private AutoCompleteTextView editSearch;
-    private RelativeLayout view;
-
-    private Animation animSlideDown;
-    private Animation animSlideUp;
-
-    private ArrayAdapter<String> historyAdapter;
+    private ImageView ivNavigationProfilePicture;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        animSlideDown = AnimationUtils.loadAnimation(this, R.anim.abc_slide_out_top);
-        animSlideUp = AnimationUtils.loadAnimation(this, R.anim.abc_slide_in_top);
-        initUI();
+        initToolbar();
+
+        if (savedInstanceState == null) {
+            startIntroAnimation();
+        }
     }
 
-    private void initUI() {
-        artistAdapter = new ArtistAdapter(this);
-        rvArtists = (RecyclerView) findViewById(R.id.rv_artist);
-        rvArtists.setLayoutManager(new GridLayoutManager(this, 2));
-        rvArtists.setItemAnimator(new DefaultItemAnimator());
-        rvArtists.setAdapter(artistAdapter);
-
+    /**
+     * All the elements that have to be
+     * initialized before the start animations
+     */
+    private void initToolbar() {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         tvToolbar = (TextView) findViewById(R.id.tv_toolbar);
-        ivSearch = (ImageView) findViewById(R.id.iv_search);
 
-        view = (RelativeLayout) findViewById(R.id.layout_search);
-        editSearch = (AutoCompleteTextView) findViewById(R.id.edit_search_query);
+        toolbar.setNavigationIcon(R.drawable.ic_menu_white_24dp);
+        toolbar.setTitle("");
+        setSupportActionBar(toolbar);
+    }
 
-        historyAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, new ArrayList<String>());
-        historyAdapter.addAll(Utils.getSetting("search_history", new HashSet<String>(), this));
-        editSearch.setAdapter(historyAdapter);
-        editSearch.setThreshold(1);
+    /**
+     * Initializes the view elements
+     * that don't need to be animated
+     * on start
+     */
+    private void initContentUI() {
+        navigationOptions = new ArrayList<>();
+        navigationOptions.add(new NavigationModel("Listen Now", R.drawable.mr_ic_pause_dark));
+        navigationOptions.add(new NavigationModel("Playlists", R.drawable.mr_ic_pause_dark));
+        navigationOptions.add(new NavigationModel("Starred", R.drawable.mr_ic_pause_dark));
+        navigationOptions.add(new NavigationModel("Profile", R.drawable.mr_ic_pause_dark));
+        navigationOptions.add(new NavigationModel("Settings", R.drawable.mr_ic_pause_dark));
+        navigationOptions.add(new NavigationModel(" ", R.drawable.mr_ic_pause_dark));
+        navigationOptions.add(new NavigationModel("Playlist 1", R.drawable.mr_ic_pause_dark));
+        navigationOptions.add(new NavigationModel("Playlist 2", R.drawable.mr_ic_pause_dark));
+        navigationOptions.add(new NavigationModel("Playlist 3", R.drawable.mr_ic_pause_dark));
+        navigationOptions.add(new NavigationModel("Playlist 4", R.drawable.mr_ic_pause_dark));
+        navigationOptions.add(new NavigationModel("Playlist 5", R.drawable.mr_ic_pause_dark));
 
-        editSearch.setOnEditorActionListener(new EditText.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER))
-                        || (actionId == EditorInfo.IME_ACTION_DONE)) {
-                    ivSearch.performClick();
-                }
-                return false;
+        navigationAdapter = new NavigationDrawerAdapter(this);
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList = (RecyclerView) findViewById(R.id.left_drawer_list);
+        mDrawerList.setLayoutManager(new LinearLayoutManager(this));
+        mDrawerList.setItemAnimator(new DefaultItemAnimator());
+
+        ivNavigationProfilePicture = (ImageView) findViewById(R.id.iv_navigation_profile_picture);
+
+        Picasso.with(this)
+                .load(getResources().getString(R.string.default_profile_picture))
+                .transform(new CircleTransformation())
+                .into(ivNavigationProfilePicture);
+
+        // Set the adapter for the list view
+        mDrawerList.setAdapter(navigationAdapter);
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
+                toolbar , R.string.drawer_open, R.string.drawer_close) {
+
+            /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+                //getActionBar().setTitle(mTitle);
+                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
-        });
 
-        editSearch.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String str = historyAdapter.getItem(position);
-                editSearch.setText(str);
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                //getActionBar().setTitle(mDrawerTitle);
+                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
-        });
+        };
 
-        artistAdapter.setOnItemClickListener(new OnRecyclerViewItemClickListener<Artist>() {
+        // Set the drawer toggle as the DrawerListener
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+
+        mDrawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
-            public void onItemClick(View view, Artist model) {
-                Intent intent = new Intent(MainActivity.this, TracksActivity.class);
-                intent.putExtra("artistId", model.id);
-                if(model.images.size() > 0) {
-                    intent.putExtra("artistImageUrl", model.images.get(0).url);
-                }
-                startActivity(intent);
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                // Because animations are pretty.
+                // Might be too much animation? Maybe a fade like Chrome
+                // uses in its menu inflater
+                navigationAdapter.setModels(navigationOptions);
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                navigationAdapter.setModels(new ArrayList<NavigationModel>());
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+
             }
         });
     }
 
     /**
-     * Called from the search button on the toolbar
-     * If search view is gone, show the search view
-     * If search view is visible, perform search query
-     * @param v
+     * Hide everything off-screen
+     * and animate on-screen
      */
-    public void onSearch(View v) {
-        if(view.getVisibility() == View.GONE) {
-            ivSearch.setImageResource(android.R.drawable.ic_menu_send);
-            view.setVisibility(View.VISIBLE);
-            view.startAnimation(animSlideUp);
-        } else {
-            if(editSearch.getText().toString().length() <= 0) {
-                Toast.makeText(this, "You need to enter a search term", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            view.setVisibility(View.GONE);
-            ivSearch.setImageResource(R.drawable.abc_ic_search_api_mtrl_alpha);
-            view.startAnimation(animSlideDown);
+    private void startIntroAnimation() {
+        int actionbarSize = Utils.dpToPx(56);
+        toolbar.setTranslationY(-actionbarSize);
+        tvToolbar.setTranslationY(-actionbarSize);
+        toolbar.animate()
+                .translationY(0)
+                .setDuration(ANIM_DURATION_TOOLBAR)
+                .setStartDelay(300);
+        tvToolbar.animate()
+                .translationY(0)
+                .setDuration(ANIM_DURATION_TOOLBAR)
+                .setStartDelay(400)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        startContentAnimation();
+                    }
+                })
+                .start();
+    }
 
-            //store the previous searches
-            Set<String> historySet = Utils.getSetting("search_history", new HashSet<String>(), this);
-            historySet.add(editSearch.getText().toString());
-            historyAdapter.add(editSearch.getText().toString());
-            Utils.storeSetting("search_history", historySet, this);
+    /**
+     * Once the intro animations are finished
+     * start the transaction
+     */
+    private void startContentAnimation() {
+        initContentUI();
 
-            tvToolbar.setText(editSearch.getText().toString());
-            new ArtistDownloader(this, artistAdapter).execute(editSearch.getText().toString());
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.content_frame, ArtistFragment.newInstance())
+                .commit();
+
+        String firstTime = Utils.getSetting(Utils.PREFS_FIRST_TIME, null, this);
+        if(firstTime == null) {
+            Utils.storeSetting(Utils.PREFS_FIRST_TIME, "false", this);
+            mDrawerLayout.openDrawer(Gravity.LEFT);
         }
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+    public void onResume() {
+        super.onResume();
     }
 }

@@ -12,7 +12,9 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 import android.view.Display;
+import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -30,12 +32,22 @@ import java.util.Set;
  */
 public class Utils {
 
-    public static final String PARSE_APPLICATION_ID = "YOUR_PARSE_APPLICATION_ID_HERE";
-    public static final String PARSE_CLIENT_ID = "YOUR_PARSE_CLIENT_ID_HERE";
-    public static final String FACEBOOK_APPLICATION_ID = "YOUR_FACEBOOK_APPLICATION_HERE";
+    public static final String PREFS_KEY = "SpotifyStreamer";
+    public static final String TAG = "SpotifyStreamer";
 
-    public static final String PREFS_KEY = "YOUR_APP_NAME_HERE";
-    public static final String TAG = "YOU_APP_NAME_HERE";
+    public static final String PREFS_FIRST_TIME = "FIRST_TIME";
+
+    public static final String PREFS_LAYOUT_MANAGER = "LAYOUT_MANAGER";
+    public static final String PREFS_GRID = "GRID";
+    public static final String PREFS_LIST = "LIST";
+
+    public static final String KEY_ARTIST_MODELS = "PARCEABLE_ARTIST_MODELS";
+    public static final String KEY_TRACK_MODELS = "PARCEABLE_TRACK_MODELS";
+    public static final String PREFS_SEARCH_HISTORY = "SEARCH_HISTORY";
+
+    public static final String INTENT_ARTIST_ID = "ARTIST_ID";
+    public static final String INTENT_ARTIST_IMAGE_URL = "ARTIST_IMAGE_URL";
+
 
     public static int dpToPx(int dp) {
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
@@ -58,7 +70,7 @@ public class Utils {
     }
 
     // Store string setting
-    public static void storeSetting(String settingKey, Set<String> settingValue, Context context) {
+    public static void storeSettingSet(String settingKey, Set<String> settingValue, Context context) {
         SharedPreferences settings = context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
         editor.putStringSet(settingKey, settingValue);
@@ -67,7 +79,7 @@ public class Utils {
     }
 
     // Get string setting
-    public static Set<String> getSetting(String settingName, Set<String> defaultValue, Context context) {
+    public static Set<String> getSettingSet(String settingName, Set<String> defaultValue, Context context) {
         SharedPreferences settings = context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE);
         settings = context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE);
         return settings.getStringSet(settingName, defaultValue);
@@ -204,6 +216,22 @@ public class Utils {
         String strSeparator = "__,__";
         String[] arr = str.split(strSeparator);
         return arr;
+    }
+
+    public static void hideKeyboard(Context ctx, View view) {
+        InputMethodManager imm = (InputMethodManager)ctx.getSystemService(
+                Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    public static void showKeyboard(final Context ctx, final View view) {
+        new Runnable() {
+            public void run() {
+                InputMethodManager inputMethodManager =  (InputMethodManager)ctx.getSystemService(ctx.INPUT_METHOD_SERVICE);
+                inputMethodManager.toggleSoftInputFromWindow(view.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
+                view.requestFocus();
+            }
+        }.run();
     }
 
     /**

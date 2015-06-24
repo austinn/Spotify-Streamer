@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,14 +17,13 @@ import android.widget.TextView;
 
 import com.refect.spotifystreamer.R;
 import com.refect.spotifystreamer.listeners.OnRecyclerViewItemClickListener;
+import com.refect.spotifystreamer.models.ArtistModel;
 import com.refect.spotifystreamer.utils.Utils;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import kaaes.spotify.webapi.android.models.Artist;
 
 
 /**
@@ -34,26 +32,28 @@ import kaaes.spotify.webapi.android.models.Artist;
  */
 public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ViewHolder> implements View.OnClickListener {
 
-	private List<Artist> models;
-	private OnRecyclerViewItemClickListener<Artist> itemClickListener;
+	private List<ArtistModel> models;
+	private OnRecyclerViewItemClickListener<ArtistModel> itemClickListener;
 	private static Context mContext;
 	private int lastAnimatedPosition = -1;
-	private static final int ANIMATED_ITEMS_COUNT = 7;
-	private boolean animateItems = false;
 
 	public ArtistAdapter(Context context) {
 		this.models = new ArrayList<>();
 		this.mContext = context;
 	}
 
-	public ArtistAdapter(List<Artist> models, Context context) {
+	public ArtistAdapter(List<ArtistModel> models, Context context) {
 		this.models = models;
 		this.mContext = context;
 	}
 
-	public void setModels(List<Artist> models) {
+	public void setModels(List<ArtistModel> models) {
 		this.models = models;
 		notifyDataSetChanged();
+	}
+
+	public List<ArtistModel> getModels() {
+		return this.models;
 	}
 
 	public void clear() {
@@ -85,32 +85,12 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ViewHolder
 	@Override
 	public void onBindViewHolder(final ViewHolder viewHolder, int i) {
 		runEnterAnimation(viewHolder.itemView, i);
-		final Artist model = models.get(i);
+		final ArtistModel model = models.get(i);
 		viewHolder.itemView.setTag(model);
-		viewHolder.name.setText(model.name);
+		viewHolder.name.setText(model.getName());
+		viewHolder.genre.setText(model.getGenre());
 
-		RelativeLayout.LayoutParams params =
-				new RelativeLayout.LayoutParams(Utils.getScreenWidth(mContext)/2, Utils.getScreenWidth(mContext)/2);
-		viewHolder.image.setLayoutParams(params);
-
-		if(model.images.size() > 0) {
-			Picasso.with(mContext)
-					.load(model.images.get(0).url)
-					.into(viewHolder.image, new Callback() {
-						@Override
-						public void onSuccess() {
-							Bitmap bitmap = ((BitmapDrawable)viewHolder.image.getDrawable()).getBitmap();
-							Palette p = Palette.from(bitmap).generate();
-
-							viewHolder.background.setBackgroundColor(p.getDarkMutedColor(Color.parseColor("#141414")));
-						}
-
-						@Override
-						public void onError() {
-
-						}
-					});
-		}
+		viewHolder.bindModel(model);
 	}
 
 	@Override
@@ -132,27 +112,50 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ViewHolder
 			background = (LinearLayout) itemView.findViewById(R.id.ll_artist_background);
 		}
 
+		public void bindModel(ArtistModel model) {
+			RelativeLayout.LayoutParams params =
+					new RelativeLayout.LayoutParams(Utils.getScreenWidth(mContext)/2, Utils.getScreenWidth(mContext)/2);
+			params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+			params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+			image.setLayoutParams(params);
+
+			Picasso.with(mContext)
+					.load(model.getUrl())
+					.error(R.drawable.record)
+					.into(image, new Callback() {
+						@Override
+						public void onSuccess() {
+							Bitmap bitmap = ((BitmapDrawable)image.getDrawable()).getBitmap();
+							Palette p = Palette.from(bitmap).generate();
+							background.setBackgroundColor(p.getLightVibrantColor(Color.parseColor("#141414")));
+						}
+						@Override
+						public void onError() {
+						}
+					});
+		}
+
 	}
 
-	public void add(Artist item, int position) {
+	public void add(ArtistModel item, int position) {
 		models.add(position, item);
 		notifyItemInserted(position);
 	}
 
-	public void remove(Artist item) {
+	public void remove(ArtistModel item) {
 		int position = models.indexOf(item);
 		models.remove(position);
 		notifyItemRemoved(position);
 	}
 
-	public void setOnItemClickListener(OnRecyclerViewItemClickListener<Artist> listener) {
+	public void setOnItemClickListener(OnRecyclerViewItemClickListener<ArtistModel> listener) {
 		this.itemClickListener = listener;
 	}
 
 	@Override
 	public void onClick(View v) {
 		if (itemClickListener != null) {
-			Artist model = (Artist) v.getTag();
+			ArtistModel model = (ArtistModel) v.getTag();
 			itemClickListener.onItemClick(v, model);
 		}
 	}

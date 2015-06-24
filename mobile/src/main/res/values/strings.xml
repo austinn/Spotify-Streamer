@@ -4,4 +4,9 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_detail">DetailActivity</string>
+
+    <string name="drawer_open"> </string>
+    <string name="drawer_close"> </string>
+
+    <string name="default_profile_picture">http://hubcaresupport.co.uk/sites/default/files/Default_Profile.jpg</string>
 </resources>
