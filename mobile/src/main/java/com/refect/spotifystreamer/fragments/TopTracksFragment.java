@@ -73,7 +73,9 @@ public class TopTracksFragment extends Fragment {
         setHasOptionsMenu(true);
         initUI(view);
 
-        new TrackDownloader(getActivity(), trackAdapter).execute(artistId);
+        if(savedInstanceState == null) {
+            new TrackDownloader(getActivity(), trackAdapter).execute(artistId);
+        }
 
         return view;
     }

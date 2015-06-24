@@ -91,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
         navigationOptions.add(new NavigationModel("Playlist 5", R.drawable.mr_ic_pause_dark));
 
         navigationAdapter = new NavigationDrawerAdapter(this);
+        navigationAdapter.setModels(navigationOptions);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (RecyclerView) findViewById(R.id.left_drawer_list);
@@ -128,31 +129,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Set the drawer toggle as the DrawerListener
         mDrawerLayout.setDrawerListener(mDrawerToggle);
-
-        mDrawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
-            @Override
-            public void onDrawerSlide(View drawerView, float slideOffset) {
-
-            }
-
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                // Because animations are pretty.
-                // Might be too much animation? Maybe a fade like Chrome
-                // uses in its menu inflater
-                navigationAdapter.setModels(navigationOptions);
-            }
-
-            @Override
-            public void onDrawerClosed(View drawerView) {
-                navigationAdapter.setModels(new ArrayList<NavigationModel>());
-            }
-
-            @Override
-            public void onDrawerStateChanged(int newState) {
-
-            }
-        });
     }
 
     /**
