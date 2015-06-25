@@ -90,7 +90,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
-                android:text="nelson.b.austin@gmail.com"
+                android:text="example@gmail.com"
                 android:gravity="center"
                 android:textColor="@color/primary_material_light"
                 android:id="@+id/textView5"
