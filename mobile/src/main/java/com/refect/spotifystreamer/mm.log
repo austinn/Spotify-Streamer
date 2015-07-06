@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:ns0="urn:partner.soap.sforce.com" xmlns:ns1="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tns="urn:partner.soap.sforce.com" xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+   <SOAP-ENV:Header>
+      <tns:SessionHeader>
+         <tns:sessionId>00Dq00000008lcU!AR8AQDPFVrCyDjdp0R8XhaequZzIZyavkSk6oAobJOoArCZu42qM1GDnokX3wTTY6hku_ryx9d5Mct8mtlpkfrBsNhYITRfL</tns:sessionId>
+      </tns:SessionHeader>
+   </SOAP-ENV:Header>
+   <ns1:Body>
+      <ns0:getUserInfo/>
+   </ns1:Body>
+</SOAP-ENV:Envelope>
+Starting new HTTPS connection (1): cl--QA.cs21.my.salesforce.com
+Starting new HTTPS connection (1): cl--QA.cs21.my.salesforce.com
+Starting new HTTPS connection (1): cl--QA.cs21.my.salesforce.com
+Starting new HTTPS connection (1): cl--QA.cs21.my.salesforce.com
+Starting new HTTPS connection (1): cl--QA.cs21.my.salesforce.com
+Starting new HTTPS connection (1): cl--QA.cs21.my.salesforce.com
+Starting new HTTPS connection (1): cl--QA.cs21.my.salesforce.com
+Starting new HTTPS connection (1): cl--QA.cs21.my.salesforce.com
+Starting new HTTPS connection (1): cl--QA.cs21.my.salesforce.com
+Starting new HTTPS connection (1): cs21.salesforce.com
+Starting new HTTPS connection (1): cs21.salesforce.com
+Starting new HTTPS connection (1): cs21.salesforce.com

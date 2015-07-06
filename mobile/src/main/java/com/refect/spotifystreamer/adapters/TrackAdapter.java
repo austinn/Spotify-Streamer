@@ -27,7 +27,7 @@ import kaaes.spotify.webapi.android.models.Track;
  */
 public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ViewHolder> implements View.OnClickListener {
 
-	private List<TrackModel> models;
+	private ArrayList<TrackModel> models;
 	private OnRecyclerViewItemClickListener<TrackModel> itemClickListener;
 	private static Context mContext;
 	private int lastAnimatedPosition = -1;
@@ -37,17 +37,17 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ViewHolder> 
 		this.mContext = context;
 	}
 
-	public TrackAdapter(List<TrackModel> models, Context context) {
+	public TrackAdapter(ArrayList<TrackModel> models, Context context) {
 		this.models = models;
 		this.mContext = context;
 	}
 
-	public void setModels(List<TrackModel> models) {
+	public void setModels(ArrayList<TrackModel> models) {
 		this.models = models;
 		notifyDataSetChanged();
 	}
 
-	public List<TrackModel> getModels() {
+	public ArrayList<TrackModel> getModels() {
 		return this.models;
 	}
 

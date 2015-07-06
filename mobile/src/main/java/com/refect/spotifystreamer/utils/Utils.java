@@ -48,6 +48,12 @@ public class Utils {
     public static final String INTENT_ARTIST_ID = "ARTIST_ID";
     public static final String INTENT_ARTIST_IMAGE_URL = "ARTIST_IMAGE_URL";
 
+    public static final String INTENT_TRACK_MODEL = "TRACK_MODEL";
+    public static final String INTENT_TRACK_MODELS = "TRACK_MODELS";
+
+    public static final String GET_ALBUM_TRACKS = "GET_ALBUM_TRACKS";
+    public static final String GET_TOP_TRACKS = "GET_TOP_TRACKS";
+
 
     public static int dpToPx(int dp) {
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);

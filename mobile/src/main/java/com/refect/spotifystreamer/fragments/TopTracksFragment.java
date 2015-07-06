@@ -2,6 +2,7 @@ package com.refect.spotifystreamer.fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -11,12 +12,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.refect.spotifystreamer.R;
-import com.refect.spotifystreamer.adapters.ArtistAdapter;
+import com.refect.spotifystreamer.adapters.AlbumAdapter;
 import com.refect.spotifystreamer.adapters.TrackAdapter;
+import com.refect.spotifystreamer.async.AlbumDownloader;
 import com.refect.spotifystreamer.async.TrackDownloader;
-import com.refect.spotifystreamer.models.ArtistModel;
+import com.refect.spotifystreamer.listeners.OnRecyclerViewItemClickListener;
 import com.refect.spotifystreamer.models.TrackModel;
 import com.refect.spotifystreamer.utils.Utils;
 
@@ -32,6 +35,9 @@ public class TopTracksFragment extends Fragment {
     private RecyclerView rvTopTracks;
     private TrackAdapter trackAdapter;
     private ArrayList<TrackModel> trackModels;
+
+    private ViewPager vpAlbums;
+    private AlbumAdapter albumAdapter;
 
     /**
      *
@@ -73,8 +79,19 @@ public class TopTracksFragment extends Fragment {
         setHasOptionsMenu(true);
         initUI(view);
 
+        trackAdapter.setOnItemClickListener(new OnRecyclerViewItemClickListener<TrackModel>() {
+            @Override
+            public void onItemClick(View view, TrackModel model) {
+                Fragment playbackFragment = PlaybackFragment.newInstance(trackAdapter.getModels(), model);
+                getFragmentManager().beginTransaction()
+                        .replace(R.id.content_frame, playbackFragment)
+                        .addToBackStack("playback")
+                        .commit();
+            }
+        });
+
         if(savedInstanceState == null) {
-            new TrackDownloader(getActivity(), trackAdapter).execute(artistId);
+            new AlbumDownloader(getActivity(), albumAdapter, trackAdapter, artistId).execute(artistId);
         }
 
         return view;
@@ -85,6 +102,32 @@ public class TopTracksFragment extends Fragment {
      * @param view
      */
     private void initUI(View view) {
+        albumAdapter = new AlbumAdapter(getActivity());
+        vpAlbums = (ViewPager) view.findViewById(R.id.vp_albums);
+        vpAlbums.setAdapter(albumAdapter);
+        vpAlbums.setOffscreenPageLimit(6);
+        vpAlbums.setClipChildren(false);
+
+        vpAlbums.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                if(albumAdapter.getItemAt(position).getId().equals("Top Tracks")) {
+                    new TrackDownloader(getActivity(), trackAdapter).execute(Utils.GET_TOP_TRACKS, artistId);
+                } else {
+                    new TrackDownloader(getActivity(), trackAdapter).execute(Utils.GET_ALBUM_TRACKS, albumAdapter.getItemAt(position).getId());
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
 
         trackAdapter = new TrackAdapter(getActivity());
         if(trackModels != null) {
@@ -95,7 +138,6 @@ public class TopTracksFragment extends Fragment {
         rvTopTracks.setLayoutManager(new LinearLayoutManager(getActivity()));
         rvTopTracks.setItemAnimator(new DefaultItemAnimator());
         rvTopTracks.setAdapter(trackAdapter);
-
     }
 
     @Override

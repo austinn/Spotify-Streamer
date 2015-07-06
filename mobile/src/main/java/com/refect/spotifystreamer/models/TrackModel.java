@@ -13,6 +13,7 @@ public class TrackModel implements Parcelable {
     private String album;
     private String artist;
     private String url;
+    private String previewUrl;
 
     public TrackModel() {
 
@@ -24,6 +25,7 @@ public class TrackModel implements Parcelable {
         album = in.readString();
         url = in.readString();
         artist = in.readString();
+        previewUrl = in.readString();
     }
 
     public static final Creator<TrackModel> CREATOR = new Creator<TrackModel>() {
@@ -90,5 +92,14 @@ public class TrackModel implements Parcelable {
         parcel.writeString(album);
         parcel.writeString(url);
         parcel.writeString(artist);
+        parcel.writeString(previewUrl);
+    }
+
+    public String getPreviewUrl() {
+        return previewUrl;
+    }
+
+    public void setPreviewUrl(String previewUrl) {
+        this.previewUrl = previewUrl;
     }
 }

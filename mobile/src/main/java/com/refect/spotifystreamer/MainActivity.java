@@ -14,10 +14,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.refect.spotifystreamer.adapters.NavigationDrawerAdapter;
 import com.refect.spotifystreamer.fragments.ArtistFragment;
+import com.refect.spotifystreamer.fragments.SettingsFragment;
 import com.refect.spotifystreamer.models.NavigationModel;
 import com.refect.spotifystreamer.utils.CircleTransformation;
 import com.refect.spotifystreamer.utils.Utils;
@@ -36,9 +39,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int ANIM_DURATION_TOOLBAR = 300;
     private static final int ANIM_DURATION_FAB = 400;
 
-    private NavigationDrawerAdapter navigationAdapter;
-    private List<NavigationModel> navigationOptions;
-    private RecyclerView mDrawerList;
+    private ScrollView mDrawerList;
+    private LinearLayout mParentLayout;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
 
@@ -77,26 +79,11 @@ public class MainActivity extends AppCompatActivity {
      * on start
      */
     private void initContentUI() {
-        navigationOptions = new ArrayList<>();
-        navigationOptions.add(new NavigationModel("Listen Now", R.drawable.mr_ic_pause_dark));
-        navigationOptions.add(new NavigationModel("Playlists", R.drawable.mr_ic_pause_dark));
-        navigationOptions.add(new NavigationModel("Starred", R.drawable.mr_ic_pause_dark));
-        navigationOptions.add(new NavigationModel("Profile", R.drawable.mr_ic_pause_dark));
-        navigationOptions.add(new NavigationModel("Settings", R.drawable.mr_ic_pause_dark));
-        navigationOptions.add(new NavigationModel(" ", R.drawable.mr_ic_pause_dark));
-        navigationOptions.add(new NavigationModel("Playlist 1", R.drawable.mr_ic_pause_dark));
-        navigationOptions.add(new NavigationModel("Playlist 2", R.drawable.mr_ic_pause_dark));
-        navigationOptions.add(new NavigationModel("Playlist 3", R.drawable.mr_ic_pause_dark));
-        navigationOptions.add(new NavigationModel("Playlist 4", R.drawable.mr_ic_pause_dark));
-        navigationOptions.add(new NavigationModel("Playlist 5", R.drawable.mr_ic_pause_dark));
-
-        navigationAdapter = new NavigationDrawerAdapter(this);
-        navigationAdapter.setModels(navigationOptions);
-
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList = (RecyclerView) findViewById(R.id.left_drawer_list);
-        mDrawerList.setLayoutManager(new LinearLayoutManager(this));
-        mDrawerList.setItemAnimator(new DefaultItemAnimator());
+        mDrawerList = (ScrollView) findViewById(R.id.left_drawer_list);
+        mParentLayout = (LinearLayout) findViewById(R.id.navigation_parent_layout);
+
+        setupNavigationViews();
 
         ivNavigationProfilePicture = (ImageView) findViewById(R.id.iv_navigation_profile_picture);
 
@@ -104,9 +91,6 @@ public class MainActivity extends AppCompatActivity {
                 .load(getResources().getString(R.string.default_profile_picture))
                 .transform(new CircleTransformation())
                 .into(ivNavigationProfilePicture);
-
-        // Set the adapter for the list view
-        mDrawerList.setAdapter(navigationAdapter);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
@@ -130,6 +114,42 @@ public class MainActivity extends AppCompatActivity {
         // Set the drawer toggle as the DrawerListener
         mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
+
+    private void setupNavigationViews() {
+        mParentLayout.addView(createView("Now Playing"));
+        mParentLayout.addView(createSettingsView("Settings"));
+    }
+
+    private View createView(String title) {
+        View view = View.inflate(getApplicationContext(), R.layout.list_item_navigation, null);
+
+        TextView tvName = (TextView) view.findViewById(R.id.tv_navigation_title);
+        tvName.setText(title);
+
+        return view;
+    }
+
+    private View createSettingsView(String title) {
+        View view = View.inflate(getApplicationContext(), R.layout.list_item_navigation, null);
+
+        TextView tvName = (TextView) view.findViewById(R.id.tv_navigation_title);
+        tvName.setText(title);
+
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getFragmentManager().beginTransaction()
+                        .replace(R.id.content_frame, new SettingsFragment())
+                        .addToBackStack("settings")
+                        .commit();
+
+                mDrawerLayout.closeDrawer(Gravity.LEFT);
+            }
+        });
+
+        return view;
+    }
+
 
     /**
      * Hide everything off-screen
