@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import com.refect.spotifystreamer.adapters.NavigationDrawerAdapter;
 import com.refect.spotifystreamer.fragments.ArtistFragment;
+import com.refect.spotifystreamer.fragments.PlaybackFragment;
 import com.refect.spotifystreamer.fragments.SettingsFragment;
 import com.refect.spotifystreamer.models.NavigationModel;
 import com.refect.spotifystreamer.utils.CircleTransformation;
@@ -28,6 +29,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import kaaes.spotify.webapi.android.models.Artist;
 
 /**
  * This class creates the navigation drawer and starts
@@ -120,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
         mParentLayout.addView(createSettingsView("Settings"));
     }
 
-    private View createView(String title) {
+    private View createView(final String title) {
         View view = View.inflate(getApplicationContext(), R.layout.list_item_navigation, null);
 
         TextView tvName = (TextView) view.findViewById(R.id.tv_navigation_title);

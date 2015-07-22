@@ -6,20 +6,32 @@
 
     <ImageView
         android:src="@drawable/record"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
         android:id="@+id/iv_track_image"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true" />
 
-    <ImageButton
-        android:src="@drawable/ic_media_play"
+    <!--<android.support.design.widget.FloatingActionButton-->
+        <!--android:src="@drawable/ic_media_pause"-->
+        <!--android:padding="10dp"-->
+        <!--android:layout_width="72dp"-->
+        <!--android:layout_height="72dp"-->
+        <!--android:id="@+id/ib_play_pause"-->
+        <!--android:layout_centerVertical="true"-->
+        <!--android:layout_centerHorizontal="true" />-->
+
+    <com.wnafee.vector.MorphButton
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:background="@drawable/circle"
-        android:layout_width="72dp"
-        android:layout_height="72dp"
-        android:id="@+id/ib_play_pause"
+        app:vc_foregroundTint="#FFF"
         android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:id="@+id/ib_play_pause"
+        app:vc_startDrawable="@drawable/ic_play_to_pause"
+        app:vc_endDrawable="@drawable/ic_pause_to_play" />
 
     <LinearLayout
         android:gravity="center_horizontal"
@@ -53,5 +65,29 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/ib_next" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:padding="20dp"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/iv_track_image"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Track"
+            android:id="@+id/tv_now_playing_track"
+            android:textColor="#FFF"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Artist"
+            android:id="@+id/tv_now_playing_artist"
+            android:textColor="#FFF"/>
     </LinearLayout>
 </RelativeLayout>

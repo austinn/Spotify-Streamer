@@ -56,7 +56,6 @@ public class ArtistFragment extends Fragment {
      */
     public static ArtistFragment newInstance() {
         ArtistFragment fragment = new ArtistFragment();
-
         return fragment;
     }
 

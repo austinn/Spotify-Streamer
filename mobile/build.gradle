@@ -45,4 +45,5 @@ dependencies {
     compile 'com.flaviofaria:kenburnsview:1.0.6'
     compile 'com.android.support:design:22.2.0'
     compile 'com.android.support:percent:22.2.0'
+    compile 'com.wnafee:vector-compat:1.0.5'
 }

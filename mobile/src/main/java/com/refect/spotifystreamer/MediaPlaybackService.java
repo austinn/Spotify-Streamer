@@ -16,6 +16,7 @@ import com.refect.spotifystreamer.models.TrackModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import kaaes.spotify.webapi.android.models.Track;
 
@@ -30,11 +31,14 @@ public class MediaPlaybackService extends Service implements
     public MediaPlayer mPlayer;
     private List<TrackModel> tracks;
     private int currentPos;
+    private boolean isPaused;
+    private boolean isShuffle;
 
     @Override
     public void onCreate() {
         super.onCreate();
         currentPos = 0;
+        isPaused = false;
         mPlayer = new MediaPlayer();
         Log.d("OnCreate", "MedaiPlayerService");
 
@@ -81,6 +85,39 @@ public class MediaPlaybackService extends Service implements
         this.tracks = tracks;
     }
 
+    public void playNext(){
+        if(isShuffle){
+            Random rand = new Random();
+            int newSong = currentPos;
+            while(newSong == currentPos){
+                newSong = rand.nextInt(tracks.size());
+            }
+            currentPos = newSong;
+        }
+        else{
+            currentPos++;
+            if(currentPos >= tracks.size()) {
+                currentPos=0;
+            }
+        }
+
+        playTrack();
+    }
+
+    public void playPrevious() {
+        currentPos--;
+        if(currentPos < 0) {
+            currentPos = 0;
+        } else {
+            playTrack();
+        }
+
+    }
+
+    public boolean isPaused() {
+        return isPaused;
+    }
+
     public class MusicBinder extends Binder {
         public MediaPlaybackService getService() {
             return MediaPlaybackService.this;
@@ -97,6 +134,8 @@ public class MediaPlaybackService extends Service implements
     public boolean onUnbind(Intent intent){
         mPlayer.stop();
         mPlayer.release();
+
+        isPaused = false;
         return false;
     }
 
@@ -119,6 +158,10 @@ public class MediaPlaybackService extends Service implements
         return mPlayer.getCurrentPosition();
     }
 
+    public int getCurrentPos() {
+        return currentPos;
+    }
+
     public int getDur(){
         return mPlayer.getDuration();
     }
@@ -128,6 +171,7 @@ public class MediaPlaybackService extends Service implements
     }
 
     public void pause(){
+        isPaused = true;
         mPlayer.pause();
     }
 

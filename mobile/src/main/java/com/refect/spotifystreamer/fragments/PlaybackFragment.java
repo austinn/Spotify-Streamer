@@ -4,8 +4,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
+import android.media.Image;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,15 +17,24 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.AnimationUtils;
+import android.view.animation.RotateAnimation;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.MediaController;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.refect.spotifystreamer.MediaPlaybackService;
 import com.refect.spotifystreamer.MusicController;
 import com.refect.spotifystreamer.R;
 import com.refect.spotifystreamer.models.TrackModel;
+import com.refect.spotifystreamer.utils.CircleTransformation;
 import com.refect.spotifystreamer.utils.Utils;
+import com.squareup.picasso.Picasso;
+import com.wnafee.vector.MorphButton;
 
 import java.util.ArrayList;
 
@@ -30,15 +42,22 @@ import java.util.ArrayList;
 public class PlaybackFragment extends Fragment implements MediaController.MediaPlayerControl {
 
     private ImageView ivTrack;
-    private ImageButton ibPlayPause;
+    private MorphButton ibPlayPause;
+    private ImageButton ibNext;
+    private ImageButton ibPrevious;
 
     private TrackModel trackModel;
     private ArrayList<TrackModel> trackModels;
+
+    private TextView tvNowPlayingTrack;
+    private TextView tvNowPlayingArtist;
 
     private MusicController controller;
     public MediaPlaybackService mediaPlaybackService;
     private Intent playbackIntent;
     private boolean isBound = false;
+
+    Animation an;
 
     /**
      *
@@ -84,13 +103,47 @@ public class PlaybackFragment extends Fragment implements MediaController.MediaP
             @Override
             public void onClick(View view) {
 
-                if(isPlaying()) {
-                    ibPlayPause.setImageResource(android.R.drawable.ic_media_play);
+                if (isPlaying()) {
                     pause();
+                    an.cancel();
+
                 } else {
-                    ibPlayPause.setImageResource(android.R.drawable.ic_media_pause);
-                    start();
+                    an.start();
+
+                    if (mediaPlaybackService.isPaused()) {
+                        start();
+                    } else {
+                        mediaPlaybackService.playTrack();
+                    }
                 }
+            }
+        });
+
+        ibNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mediaPlaybackService.playNext();
+
+                tvNowPlayingTrack.setText(trackModels.get(mediaPlaybackService.getCurrentPos()).getTitle());
+                tvNowPlayingArtist.setText(trackModels.get(mediaPlaybackService.getCurrentPos()).getArtist());
+
+                Picasso.with(getActivity()).load(trackModels.get(mediaPlaybackService.getCurrentPos()).getUrl())
+                        .transform(new CircleTransformation())
+                        .into(ivTrack);
+            }
+        });
+
+        ibPrevious.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mediaPlaybackService.playPrevious();
+
+                tvNowPlayingTrack.setText(trackModels.get(mediaPlaybackService.getCurrentPos()).getTitle());
+                tvNowPlayingArtist.setText(trackModels.get(mediaPlaybackService.getCurrentPos()).getArtist());
+
+                Picasso.with(getActivity()).load(trackModels.get(mediaPlaybackService.getCurrentPos()).getUrl())
+                        .transform(new CircleTransformation())
+                        .into(ivTrack);
             }
         });
 
@@ -104,8 +157,23 @@ public class PlaybackFragment extends Fragment implements MediaController.MediaP
     private void initUI(View view) {
 
         ivTrack = (ImageView) view.findViewById(R.id.iv_track_image);
-        ibPlayPause = (ImageButton) view.findViewById(R.id.ib_play_pause);
+        ibPlayPause = (MorphButton) view.findViewById(R.id.ib_play_pause);
+        ibNext = (ImageButton) view.findViewById(R.id.ib_next);
+        ibPrevious = (ImageButton) view.findViewById(R.id.ib_previous);
+        tvNowPlayingTrack = (TextView) view.findViewById(R.id.tv_now_playing_track);
+        tvNowPlayingArtist = (TextView) view.findViewById(R.id.tv_now_playing_artist);
 
+        an = AnimationUtils.loadAnimation(getActivity(), R.anim.rotate);
+        ivTrack.setAnimation(an);
+
+        RelativeLayout.LayoutParams params =
+                new RelativeLayout.LayoutParams(Utils.getScreenWidth(getActivity()) - 100, Utils.getScreenWidth(getActivity()) - 100);
+        params.addRule(RelativeLayout.CENTER_IN_PARENT);
+        ivTrack.setLayoutParams(params);
+
+        Picasso.with(getActivity()).load(trackModel.getUrl())
+                .transform(new CircleTransformation())
+                .into(ivTrack);
     }
 
     @Override
@@ -118,8 +186,20 @@ public class PlaybackFragment extends Fragment implements MediaController.MediaP
         controller = new MusicController(getActivity());
 
         controller.setMediaPlayer(this);
-        controller.setAnchorView(view.findViewById(R.id.toolbar));
+        controller.setAnchorView(view.findViewById(R.id.iv_track_image));
         controller.setEnabled(true);
+
+        controller.setPrevNextListeners(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mediaPlaybackService.playNext();
+            }
+        }, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mediaPlaybackService.playPrevious();
+            }
+        });
     }
 
     public ServiceConnection musicConnection = new ServiceConnection(){
@@ -129,7 +209,11 @@ public class PlaybackFragment extends Fragment implements MediaController.MediaP
             MediaPlaybackService.MusicBinder binder = (MediaPlaybackService.MusicBinder)service;
             mediaPlaybackService = binder.getService();
             mediaPlaybackService.setTracks(trackModels);
-            mediaPlaybackService.setTrack(0);
+            mediaPlaybackService.setTrack(findPosition());
+
+            tvNowPlayingTrack.setText(trackModels.get(mediaPlaybackService.getCurrentPos()).getTitle());
+            tvNowPlayingArtist.setText(trackModels.get(mediaPlaybackService.getCurrentPos()).getArtist());
+
             isBound = true;
             Log.d("isBound", isBound + "");
         }
@@ -139,6 +223,18 @@ public class PlaybackFragment extends Fragment implements MediaController.MediaP
             isBound = false;
         }
     };
+
+    private int findPosition() {
+        int pos = 0;
+
+        for(int i = 0; i < trackModels.size(); i++) {
+            if(trackModels.get(i).getId().equals(trackModel.getId())) {
+                pos = i;
+            }
+        }
+
+        return pos;
+    }
 
     @Override
     public void onStart() {
@@ -163,7 +259,7 @@ public class PlaybackFragment extends Fragment implements MediaController.MediaP
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_top_tracks, menu);
 
-        super.onCreateOptionsMenu(menu,inflater);
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
@@ -176,6 +272,15 @@ public class PlaybackFragment extends Fragment implements MediaController.MediaP
     @Override
     public void pause() {
         mediaPlaybackService.pause();
+        //ibPlayPause.setImageResource(android.R.drawable.ic_media_play);
+        ibPlayPause.setState(MorphButton.MorphState.START, true);
+        an.cancel();
+    }
+
+    @Override
+    public void onStop() {
+        controller.hide();
+        super.onStop();
     }
 
     @Override
@@ -186,6 +291,9 @@ public class PlaybackFragment extends Fragment implements MediaController.MediaP
     @Override
     public void start() {
         mediaPlaybackService.play();
+        //ibPlayPause.setImageResource(android.R.drawable.ic_media_pause);
+        ibPlayPause.setState(MorphButton.MorphState.END, true);
+        an.start();
     }
 
     @Override
