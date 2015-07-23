@@ -29,6 +29,7 @@ public class MediaPlaybackService extends Service implements
 
     private final IBinder musicBind = new MusicBinder();
     public MediaPlayer mPlayer;
+
     private List<TrackModel> tracks;
     private int currentPos;
     private boolean isPaused;
@@ -83,6 +84,10 @@ public class MediaPlaybackService extends Service implements
     public void setTracks(List<TrackModel> tracks) {
         Log.d("Set tracks", tracks.size() + "");
         this.tracks = tracks;
+    }
+
+    public List<TrackModel> getTracks() {
+        return tracks;
     }
 
     public void playNext(){

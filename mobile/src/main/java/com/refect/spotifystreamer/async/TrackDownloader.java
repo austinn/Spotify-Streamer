@@ -18,6 +18,7 @@ import java.util.Map;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.Album;
 import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
 import kaaes.spotify.webapi.android.models.Pager;
@@ -75,15 +76,17 @@ public class TrackDownloader extends AsyncTask<String, Void, ArrayList<TrackMode
                 trackModel.setTitle(track.name);
                 trackModel.setPreviewUrl(track.preview_url);
 
-//                trackModel.setAlbum(track.album.name);
-//
-//                if (track.artists.size() > 0) {
-//                    trackModel.setArtist(track.artists.get(0).name);
-//                }
-//
-//                if (track.album.images.size() > 0) {
-//                    trackModel.setUrl(track.album.images.get(0).url);
-//                }
+                Album album = spotify.getAlbum(params[1]);
+
+                trackModel.setAlbum(album.name);
+
+                if (track.artists.size() > 0) {
+                    trackModel.setArtist(track.artists.get(0).name);
+                }
+
+                if (album.images.size() > 0) {
+                    trackModel.setUrl(album.images.get(0).url);
+                }
 
                 results.add(trackModel);
             }

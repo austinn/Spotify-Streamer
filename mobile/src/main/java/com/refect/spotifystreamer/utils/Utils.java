@@ -45,6 +45,7 @@ public class Utils {
     public static final String KEY_TRACK_MODELS = "PARCEABLE_TRACK_MODELS";
     public static final String PREFS_SEARCH_HISTORY = "SEARCH_HISTORY";
 
+    public static final String INTENT_ARTIST_NAME = "INTENT_ARTIST_NAME";
     public static final String INTENT_ARTIST_ID = "ARTIST_ID";
     public static final String INTENT_ARTIST_IMAGE_URL = "ARTIST_IMAGE_URL";
 

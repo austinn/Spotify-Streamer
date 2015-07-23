@@ -149,6 +149,7 @@ public class ArtistFragment extends Fragment {
             public void onItemClick(View view, ArtistModel model) {
 
                 HashMap<String, String> params = new HashMap<>();
+                params.put(Utils.INTENT_ARTIST_NAME, model.getName());
                 params.put(Utils.INTENT_ARTIST_ID, model.getId());
                 params.put(Utils.INTENT_ARTIST_IMAGE_URL, model.getUrl());
 

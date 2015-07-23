@@ -1,16 +1,7 @@
 package com.refect.spotifystreamer.fragments;
 
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.graphics.Color;
-import android.media.Image;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,17 +9,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
-import android.view.animation.RotateAnimation;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.MediaController;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.refect.spotifystreamer.MediaPlaybackService;
-import com.refect.spotifystreamer.MusicController;
+import com.refect.spotifystreamer.MainActivity;
 import com.refect.spotifystreamer.R;
 import com.refect.spotifystreamer.models.TrackModel;
 import com.refect.spotifystreamer.utils.CircleTransformation;
@@ -39,7 +26,7 @@ import com.wnafee.vector.MorphButton;
 import java.util.ArrayList;
 
 
-public class PlaybackFragment extends Fragment implements MediaController.MediaPlayerControl {
+public class PlaybackFragment extends Fragment {
 
     private ImageView ivTrack;
     private MorphButton ibPlayPause;
@@ -52,11 +39,7 @@ public class PlaybackFragment extends Fragment implements MediaController.MediaP
     private TextView tvNowPlayingTrack;
     private TextView tvNowPlayingArtist;
 
-    private MusicController controller;
-    public MediaPlaybackService mediaPlaybackService;
-    private Intent playbackIntent;
-    private boolean isBound = false;
-
+    MainActivity mActivity;
     Animation an;
 
     /**
@@ -94,26 +77,29 @@ public class PlaybackFragment extends Fragment implements MediaController.MediaP
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view =  inflater.inflate(R.layout.fragment_playback, container, false);
+        mActivity = ((MainActivity)getActivity());
 
         setHasOptionsMenu(true);
         initUI(view);
-        setController(view);
+        //setController(view);
+        mActivity.mediaPlaybackService.setTracks(trackModels);
+        mActivity.mediaPlaybackService.setTrack(findPosition());
 
         ibPlayPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                if (isPlaying()) {
-                    pause();
+                if (mActivity.isPlaying()) {
+                    mActivity.pause();
                     an.cancel();
 
                 } else {
                     an.start();
 
-                    if (mediaPlaybackService.isPaused()) {
-                        start();
+                    if (mActivity.mediaPlaybackService.isPaused()) {
+                        mActivity.start();
                     } else {
-                        mediaPlaybackService.playTrack();
+                        mActivity.mediaPlaybackService.playTrack();
                     }
                 }
             }
@@ -122,28 +108,34 @@ public class PlaybackFragment extends Fragment implements MediaController.MediaP
         ibNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mediaPlaybackService.playNext();
+                mActivity.mediaPlaybackService.playNext();
 
-                tvNowPlayingTrack.setText(trackModels.get(mediaPlaybackService.getCurrentPos()).getTitle());
-                tvNowPlayingArtist.setText(trackModels.get(mediaPlaybackService.getCurrentPos()).getArtist());
+                tvNowPlayingTrack.setText(trackModels.get(mActivity.mediaPlaybackService.getCurrentPos()).getTitle());
+                tvNowPlayingArtist.setText(trackModels.get(mActivity.mediaPlaybackService.getCurrentPos()).getArtist());
 
-                Picasso.with(getActivity()).load(trackModels.get(mediaPlaybackService.getCurrentPos()).getUrl())
+                Picasso.with(getActivity()).load(trackModels.get(mActivity.mediaPlaybackService.getCurrentPos()).getUrl())
                         .transform(new CircleTransformation())
                         .into(ivTrack);
+
+                Picasso.with(getActivity()).load(trackModels.get(mActivity.mediaPlaybackService.getCurrentPos()).getUrl())
+                        .into(mActivity.ivTrackImage);
             }
         });
 
         ibPrevious.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mediaPlaybackService.playPrevious();
+                mActivity.mediaPlaybackService.playPrevious();
 
-                tvNowPlayingTrack.setText(trackModels.get(mediaPlaybackService.getCurrentPos()).getTitle());
-                tvNowPlayingArtist.setText(trackModels.get(mediaPlaybackService.getCurrentPos()).getArtist());
+                tvNowPlayingTrack.setText(trackModels.get(mActivity.mediaPlaybackService.getCurrentPos()).getTitle());
+                tvNowPlayingArtist.setText(trackModels.get(mActivity.mediaPlaybackService.getCurrentPos()).getArtist());
 
-                Picasso.with(getActivity()).load(trackModels.get(mediaPlaybackService.getCurrentPos()).getUrl())
+                Picasso.with(getActivity()).load(trackModels.get(mActivity.mediaPlaybackService.getCurrentPos()).getUrl())
                         .transform(new CircleTransformation())
                         .into(ivTrack);
+
+                Picasso.with(getActivity()).load(trackModels.get(mActivity.mediaPlaybackService.getCurrentPos()).getUrl())
+                        .into(mActivity.ivTrackImage);
             }
         });
 
@@ -167,13 +159,16 @@ public class PlaybackFragment extends Fragment implements MediaController.MediaP
         ivTrack.setAnimation(an);
 
         RelativeLayout.LayoutParams params =
-                new RelativeLayout.LayoutParams(Utils.getScreenWidth(getActivity()) - 100, Utils.getScreenWidth(getActivity()) - 100);
+                new RelativeLayout.LayoutParams(Utils.getScreenWidth(getActivity()) - 175, Utils.getScreenWidth(getActivity()) - 175);
         params.addRule(RelativeLayout.CENTER_IN_PARENT);
         ivTrack.setLayoutParams(params);
 
         Picasso.with(getActivity()).load(trackModel.getUrl())
                 .transform(new CircleTransformation())
                 .into(ivTrack);
+
+        Picasso.with(getActivity()).load(trackModels.get(mActivity.mediaPlaybackService.getCurrentPos()).getUrl())
+                .into(mActivity.ivTrackImage);
     }
 
     @Override
@@ -181,48 +176,6 @@ public class PlaybackFragment extends Fragment implements MediaController.MediaP
         super.onSaveInstanceState(outState);
 
     }
-
-    private void setController(View view){
-        controller = new MusicController(getActivity());
-
-        controller.setMediaPlayer(this);
-        controller.setAnchorView(view.findViewById(R.id.iv_track_image));
-        controller.setEnabled(true);
-
-        controller.setPrevNextListeners(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mediaPlaybackService.playNext();
-            }
-        }, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mediaPlaybackService.playPrevious();
-            }
-        });
-    }
-
-    public ServiceConnection musicConnection = new ServiceConnection(){
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            MediaPlaybackService.MusicBinder binder = (MediaPlaybackService.MusicBinder)service;
-            mediaPlaybackService = binder.getService();
-            mediaPlaybackService.setTracks(trackModels);
-            mediaPlaybackService.setTrack(findPosition());
-
-            tvNowPlayingTrack.setText(trackModels.get(mediaPlaybackService.getCurrentPos()).getTitle());
-            tvNowPlayingArtist.setText(trackModels.get(mediaPlaybackService.getCurrentPos()).getArtist());
-
-            isBound = true;
-            Log.d("isBound", isBound + "");
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            isBound = false;
-        }
-    };
 
     private int findPosition() {
         int pos = 0;
@@ -239,20 +192,33 @@ public class PlaybackFragment extends Fragment implements MediaController.MediaP
     @Override
     public void onStart() {
         super.onStart();
-        Log.d("OnStart", "Playback Fragment");
-        if(playbackIntent == null){
-            Log.d("PlaybackIntent", "is null");
-            playbackIntent = new Intent(getActivity(), MediaPlaybackService.class);
-            getActivity().bindService(playbackIntent, musicConnection, Context.BIND_AUTO_CREATE);
-            getActivity().startService(playbackIntent);
-        }
+        Animation slideDown = AnimationUtils.loadAnimation(getActivity(), R.anim.abc_slide_out_bottom);
+        mActivity.viewMediaController.startAnimation(slideDown);
+
+        slideDown.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                mActivity.viewMediaController.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
     }
 
     @Override
     public void onDestroy() {
-        getActivity().stopService(playbackIntent);
-        mediaPlaybackService = null;
         super.onDestroy();
+        Animation slideUp = AnimationUtils.loadAnimation(getActivity(), R.anim.abc_slide_in_bottom);
+        mActivity.viewMediaController.setVisibility(View.VISIBLE);
+        mActivity.viewMediaController.startAnimation(slideUp);
     }
 
     @Override
@@ -267,78 +233,5 @@ public class PlaybackFragment extends Fragment implements MediaController.MediaP
         int id = item.getItemId();
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void pause() {
-        mediaPlaybackService.pause();
-        //ibPlayPause.setImageResource(android.R.drawable.ic_media_play);
-        ibPlayPause.setState(MorphButton.MorphState.START, true);
-        an.cancel();
-    }
-
-    @Override
-    public void onStop() {
-        controller.hide();
-        super.onStop();
-    }
-
-    @Override
-    public void seekTo(int pos) {
-        mediaPlaybackService.seek(pos);
-    }
-
-    @Override
-    public void start() {
-        mediaPlaybackService.play();
-        //ibPlayPause.setImageResource(android.R.drawable.ic_media_pause);
-        ibPlayPause.setState(MorphButton.MorphState.END, true);
-        an.start();
-    }
-
-    @Override
-    public int getDuration() {
-        if(mediaPlaybackService != null && isBound && mediaPlaybackService.isPlaying())
-        return mediaPlaybackService.getDur();
-        else return 0;
-    }
-
-    @Override
-    public int getCurrentPosition() {
-        if(mediaPlaybackService != null && isBound && mediaPlaybackService.isPlaying())
-        return mediaPlaybackService.getPos();
-        else return 0;
-    }
-
-    @Override
-    public boolean isPlaying() {
-        if (mediaPlaybackService != null && isBound)
-        return mediaPlaybackService.isPlaying();
-        return false;
-    }
-
-    @Override
-    public int getBufferPercentage() {
-        return 0;
-    }
-
-    @Override
-    public boolean canPause() {
-        return true;
-    }
-
-    @Override
-    public boolean canSeekBackward() {
-        return true;
-    }
-
-    @Override
-    public boolean canSeekForward() {
-        return true;
-    }
-
-    @Override
-    public int getAudioSessionId() {
-        return 0;
     }
 }

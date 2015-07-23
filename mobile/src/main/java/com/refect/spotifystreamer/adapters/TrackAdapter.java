@@ -72,7 +72,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ViewHolder> 
 
 	@Override
 	public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-		View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_track, viewGroup, false);
+		View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_track_simple, viewGroup, false);
 		v.setOnClickListener(this);		
 		return new ViewHolder(v);
 	}
@@ -83,11 +83,11 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ViewHolder> 
 		final TrackModel model = models.get(i);
 		viewHolder.itemView.setTag(model);
 
-		viewHolder.title.setText(model.getTitle());
-		viewHolder.artist.setText(model.getArtist());
+		viewHolder.title.setText(i + "");
+		viewHolder.artist.setText(model.getTitle());
 
-		Picasso.with(mContext).load(model.getUrl())
-				.into(viewHolder.image);
+//		Picasso.with(mContext).load(model.getUrl())
+//				.into(viewHolder.image);
 	}
 
 	@Override
@@ -104,7 +104,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ViewHolder> 
 			super(itemView);
 			title = (TextView) itemView.findViewById(R.id.tv_track_name);
 			artist = (TextView) itemView.findViewById(R.id.tv_track_artist);
-			image = (ImageView) itemView.findViewById(R.id.iv_album_image);
+//			image = (ImageView) itemView.findViewById(R.id.iv_album_image);
 		}
 
 	}
