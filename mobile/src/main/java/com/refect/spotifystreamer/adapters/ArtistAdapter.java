@@ -36,15 +36,24 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ViewHolder
 	private OnRecyclerViewItemClickListener<ArtistModel> itemClickListener;
 	private static Context mContext;
 	private int lastAnimatedPosition = -1;
+    public boolean isTwoPane;
 
 	public ArtistAdapter(Context context) {
 		this.models = new ArrayList<>();
 		this.mContext = context;
+        this.isTwoPane = false;
 	}
+
+    public ArtistAdapter(Context context, boolean isTwoPane) {
+        this.models = new ArrayList<>();
+        this.mContext = context;
+        this.isTwoPane = isTwoPane;
+    }
 
 	public ArtistAdapter(List<ArtistModel> models, Context context) {
 		this.models = models;
 		this.mContext = context;
+        this.isTwoPane = false;
 	}
 
 	public void setModels(List<ArtistModel> models) {
@@ -90,7 +99,7 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ViewHolder
 		viewHolder.name.setText(model.getName());
 		viewHolder.genre.setText(model.getGenre());
 
-		viewHolder.bindModel(model);
+		viewHolder.bindModel(model, isTwoPane);
 	}
 
 	@Override
@@ -112,9 +121,15 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ViewHolder
 			background = (LinearLayout) itemView.findViewById(R.id.ll_artist_background);
 		}
 
-		public void bindModel(ArtistModel model) {
-			RelativeLayout.LayoutParams params =
-					new RelativeLayout.LayoutParams(Utils.getScreenWidth(mContext)/2, Utils.getScreenWidth(mContext)/2);
+		public void bindModel(ArtistModel model, boolean isTwoPane) {
+			RelativeLayout.LayoutParams params;
+
+            if(isTwoPane) {
+                params = new RelativeLayout.LayoutParams(Utils.getScreenWidth(mContext)/4, Utils.getScreenWidth(mContext)/4);
+            } else {
+                params = new RelativeLayout.LayoutParams(Utils.getScreenWidth(mContext)/2, Utils.getScreenWidth(mContext)/2);
+            }
+
 			params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
 			params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 			image.setLayoutParams(params);

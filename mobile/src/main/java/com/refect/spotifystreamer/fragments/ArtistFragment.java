@@ -6,6 +6,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -22,6 +23,7 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.refect.spotifystreamer.MainActivity;
 import com.refect.spotifystreamer.R;
 import com.refect.spotifystreamer.adapters.ArtistAdapter;
 import com.refect.spotifystreamer.async.ArtistDownloader;
@@ -31,6 +33,7 @@ import com.refect.spotifystreamer.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 
 public class ArtistFragment extends Fragment {
@@ -50,12 +53,18 @@ public class ArtistFragment extends Fragment {
     private GridLayoutManager gridLayoutManager;
     private LinearLayoutManager linearLayoutManager;
 
+    private boolean isTwoPane;
+
     /**
      *
      * @return A new instance of fragment ArtistFragment.
      */
-    public static ArtistFragment newInstance() {
+    public static ArtistFragment newInstance(Map<String, String> prefs) {
         ArtistFragment fragment = new ArtistFragment();
+        Bundle args = new Bundle();
+        args.putString(Utils.INTENT_TWO_PANE, prefs.get(Utils.INTENT_TWO_PANE));
+        fragment.setArguments(args);
+        Log.d("ArtistFragment", "newInstance");
         return fragment;
     }
 
@@ -71,12 +80,21 @@ public class ArtistFragment extends Fragment {
             artistModels = savedInstanceState.getParcelableArrayList(Utils.KEY_ARTIST_MODELS);
         }
 
+        if(getArguments() != null) {
+
+        }
+
+        Log.d("ArtistFragment", "onCreate");
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view =  inflater.inflate(R.layout.fragment_artists, container, false);
+        Log.d("ArtistFragment", "onCreateView");
+
+        isTwoPane = true;
 
         animSlideDown = AnimationUtils.loadAnimation(getActivity(), R.anim.abc_slide_out_top);
         animSlideUp = AnimationUtils.loadAnimation(getActivity(), R.anim.abc_slide_in_top);
@@ -103,7 +121,7 @@ public class ArtistFragment extends Fragment {
      * @param view
      */
     private void initUI(View view) {
-        artistAdapter = new ArtistAdapter(getActivity());
+        artistAdapter = new ArtistAdapter(getActivity(), isTwoPane);
         if(artistModels != null) {
             artistAdapter.setModels(artistModels);
         }
@@ -152,6 +170,7 @@ public class ArtistFragment extends Fragment {
                 params.put(Utils.INTENT_ARTIST_NAME, model.getName());
                 params.put(Utils.INTENT_ARTIST_ID, model.getId());
                 params.put(Utils.INTENT_ARTIST_IMAGE_URL, model.getUrl());
+                params.put(Utils.INTENT_TWO_PANE, isTwoPane + "");
 
                 Fragment topTracksFragment = TopTracksFragment.newInstance(params);
                 getFragmentManager().beginTransaction()

@@ -25,7 +25,7 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
             android:layout_above="@+id/view_media_controller"
-            android:layout_below="@+id/toolbar"/>
+            android:layout_alignParentTop="true"/>
 
         <include layout="@layout/view_media_controller"
                  android:layout_width="wrap_content"

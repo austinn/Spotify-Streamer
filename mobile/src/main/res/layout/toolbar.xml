@@ -3,7 +3,7 @@
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
-    android:background="#141414"
+    android:background="@android:color/transparent"
     android:elevation="@dimen/default_elevation">
 
 
@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:textStyle="bold"
-        android:text="Spotify Streamer"
+        android:text=""
         android:textColor="#FFF"/>
 
 

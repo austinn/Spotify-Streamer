@@ -69,14 +69,14 @@ public class TrackDownloader extends AsyncTask<String, Void, ArrayList<TrackMode
             SpotifyApi api = new SpotifyApi();
             SpotifyService spotify = api.getService();
             Pager<Track> albumTracks = spotify.getAlbumTracks(params[1]);
+            Album album = spotify.getAlbum(params[1]);
 
             for (Track track : albumTracks.items) {
                 TrackModel trackModel = new TrackModel();
                 trackModel.setId(track.id);
                 trackModel.setTitle(track.name);
                 trackModel.setPreviewUrl(track.preview_url);
-
-                Album album = spotify.getAlbum(params[1]);
+                trackModel.setShareUrl(track.external_urls.get("spotify"));
 
                 trackModel.setAlbum(album.name);
 
@@ -119,6 +119,7 @@ public class TrackDownloader extends AsyncTask<String, Void, ArrayList<TrackMode
                 trackModel.setTitle(track.name);
                 trackModel.setAlbum(track.album.name);
                 trackModel.setPreviewUrl(track.preview_url);
+                trackModel.setShareUrl(track.external_urls.get("spotify"));
 
                 if (track.artists.size() > 0) {
                     trackModel.setArtist(track.artists.get(0).name);

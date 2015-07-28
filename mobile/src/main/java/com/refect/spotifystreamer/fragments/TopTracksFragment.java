@@ -1,11 +1,16 @@
 package com.refect.spotifystreamer.fragments;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,6 +23,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -60,6 +67,8 @@ public class TopTracksFragment extends Fragment {
     private ViewPager vpAlbums;
     private AlbumAdapter albumAdapter;
 
+    private boolean isTwoPane;
+
     /**
      *
      * @return A new instance of fragment ArtistFragment.
@@ -70,6 +79,7 @@ public class TopTracksFragment extends Fragment {
         args.putString(Utils.INTENT_ARTIST_NAME, params.get(Utils.INTENT_ARTIST_NAME));
         args.putString(Utils.INTENT_ARTIST_ID, params.get(Utils.INTENT_ARTIST_ID));
         args.putString(Utils.INTENT_ARTIST_IMAGE_URL, params.get(Utils.INTENT_ARTIST_IMAGE_URL));
+        args.putString(Utils.INTENT_TWO_PANE, params.get(Utils.INTENT_TWO_PANE));
         fragment.setArguments(args);
         return fragment;
     }
@@ -90,6 +100,7 @@ public class TopTracksFragment extends Fragment {
             artistName = getArguments().getString(Utils.INTENT_ARTIST_NAME);
             artistId = getArguments().getString(Utils.INTENT_ARTIST_ID);
             artistImageUrl = getArguments().getString(Utils.INTENT_ARTIST_IMAGE_URL);
+            isTwoPane = Boolean.parseBoolean(getArguments().getString(Utils.INTENT_TWO_PANE));
         }
 
     }
@@ -105,11 +116,15 @@ public class TopTracksFragment extends Fragment {
         trackAdapter.setOnItemClickListener(new OnRecyclerViewItemClickListener<TrackModel>() {
             @Override
             public void onItemClick(View view, TrackModel model) {
-                Fragment playbackFragment = PlaybackFragment.newInstance(trackAdapter.getModels(), model);
-                getFragmentManager().beginTransaction()
-                        .replace(R.id.content_frame, playbackFragment)
-                        .addToBackStack("playback")
-                        .commit();
+                if (isTwoPane) {
+                    showPlaybackDialog(trackAdapter.getModels(), model, artistImageUrl);
+                } else {
+                    Fragment playbackFragment = PlaybackFragment.newInstance(trackAdapter.getModels(), model, artistImageUrl);
+                    getFragmentManager().beginTransaction()
+                            .replace(R.id.content_frame, playbackFragment, "playback")
+                            .addToBackStack("playback")
+                            .commit();
+                }
             }
         });
 
@@ -118,6 +133,20 @@ public class TopTracksFragment extends Fragment {
         }
 
         return view;
+    }
+
+    /**
+     *
+     * @param models
+     * @param model
+     * @param artistImageUrl
+     */
+    private void showPlaybackDialog(ArrayList<TrackModel> models, TrackModel model, String artistImageUrl) {
+
+        // Create and show the dialog.
+        DialogFragment newFragment = MyDialogFragment.newInstance(1, models, model, artistImageUrl);
+        newFragment.show(getActivity().getSupportFragmentManager(), "dialog");
+
     }
 
     /**
@@ -162,6 +191,7 @@ public class TopTracksFragment extends Fragment {
                     new LinearLayout.LayoutParams((Utils.getScreenWidth(getActivity())/3) - 20, LinearLayout.LayoutParams.MATCH_PARENT);
             params.leftMargin = 10;
             params.rightMargin = 10;
+            params.bottomMargin = 5;
             view.setLayoutParams(params);
 
             view.setOnClickListener(new View.OnClickListener() {

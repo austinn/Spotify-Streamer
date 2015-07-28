@@ -145,8 +145,11 @@ public class MediaPlaybackService extends Service implements
     }
 
     @Override
-    public void onCompletion(MediaPlayer mediaPlayer) {
-
+    public void onCompletion(MediaPlayer mp) {
+        if(mPlayer.getCurrentPosition() > 0){
+            mp.reset();
+            playNext();
+        }
     }
 
     @Override

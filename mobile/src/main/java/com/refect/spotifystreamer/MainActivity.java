@@ -6,6 +6,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
+import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.FragmentManager;
@@ -36,7 +39,9 @@ import com.squareup.picasso.Picasso;
 import com.wnafee.vector.MorphButton;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import kaaes.spotify.webapi.android.models.Artist;
 
@@ -55,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
 
-    private Toolbar toolbar;
+    public Toolbar toolbar;
     private TextView tvToolbar;
     private ImageView ivNavigationProfilePicture;
 
@@ -67,12 +72,22 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
     public View viewMediaController;
     public ImageView ivTrackImage;
     public ImageView ivMediaControllerPlayPause;
+    public TextView tvMediaControllerTitle;
+    public TextView tvMediaControllerArtist;
 
+    public static boolean isTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.d("MainActivity", "onCreate");
+
+        if(findViewById(R.id.static_fragment) != null) {
+            isTwoPane = true;
+        } else {
+            isTwoPane = false;
+        }
 
         initToolbar();
         initMediaController();
@@ -97,8 +112,17 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
 
     private void initMediaController() {
         viewMediaController = findViewById(R.id.view_media_controller);
+        tvMediaControllerTitle = (TextView) findViewById(R.id.tv_media_controller_title);
+        tvMediaControllerArtist = (TextView) findViewById(R.id.tv_media_controller_artist);
         ivTrackImage = (ImageView) findViewById(R.id.iv_track_image);
         ivMediaControllerPlayPause = (ImageView) findViewById(R.id.iv_media_controller_play_pause);
+
+        ivTrackImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
 
         /**
          *
@@ -106,6 +130,19 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
         ivMediaControllerPlayPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                if (isPlaying()) {
+                    pause();
+                    ivMediaControllerPlayPause.setImageResource(R.drawable.ic_play_arrow_black_24dp);
+
+                } else {
+                    if (mediaPlaybackService.isPaused()) {
+                        start();
+                    } else {
+                        mediaPlaybackService.playTrack();
+                    }
+                    ivMediaControllerPlayPause.setImageResource(R.drawable.ic_pause_black_24dp);
+                }
 
             }
         });
@@ -226,10 +263,16 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
     private void startContentAnimation() {
         initContentUI();
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.content_frame, ArtistFragment.newInstance())
-                .commit();
+        Map<String, String> prefs = new HashMap<>();
+        prefs.put(Utils.INTENT_TWO_PANE, isTwoPane + "");
+
+        if(!isTwoPane) {
+            Log.d("TwoPane", "Not two pane");
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.content_frame, ArtistFragment.newInstance(prefs))
+                    .commit();
+        }
 
         String firstTime = Utils.getSetting(Utils.PREFS_FIRST_TIME, null, this);
         if(firstTime == null) {

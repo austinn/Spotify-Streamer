@@ -14,6 +14,7 @@ public class TrackModel implements Parcelable {
     private String artist;
     private String url;
     private String previewUrl;
+    private String shareUrl;
 
     public TrackModel() {
 
@@ -26,6 +27,7 @@ public class TrackModel implements Parcelable {
         url = in.readString();
         artist = in.readString();
         previewUrl = in.readString();
+        shareUrl = in.readString();
     }
 
     public static final Creator<TrackModel> CREATOR = new Creator<TrackModel>() {
@@ -80,6 +82,14 @@ public class TrackModel implements Parcelable {
         this.artist = artist;
     }
 
+    public String getShareUrl() {
+        return shareUrl;
+    }
+
+    public void setShareUrl(String shareUrl) {
+        this.shareUrl = shareUrl;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -93,6 +103,7 @@ public class TrackModel implements Parcelable {
         parcel.writeString(url);
         parcel.writeString(artist);
         parcel.writeString(previewUrl);
+        parcel.writeString(shareUrl);
     }
 
     public String getPreviewUrl() {
